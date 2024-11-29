@@ -305,6 +305,8 @@ fork(void)
 
   pid = np->pid;
 
+  np->trace_mask = p->trace_mask;
+
   release(&np->lock);
 
   acquire(&wait_lock);
@@ -653,4 +655,15 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+void
+getNproc(uint64 *nproc)
+{
+    *nproc = 0;
+
+    struct proc *p;
+    for(p = proc; p < &proc[NPROC]; p++){
+        if (p->state != UNUSED) *nproc += 1;
+    }
 }

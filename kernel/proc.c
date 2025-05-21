@@ -667,3 +667,13 @@ getNproc(uint64 *nproc)
         if (p->state != UNUSED) *nproc += 1;
     }
 }
+
+int getprocs(void)
+{
+    int res = 0;
+    struct proc *p;
+    for(p = proc; p < &proc[NPROC]; p++){
+        if (p->state != UNUSED) res += 1;
+    }
+    return res;
+}

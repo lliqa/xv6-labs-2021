@@ -120,3 +120,8 @@ sys_sysinfo(void)
     if (copyout(myproc()->pagetable, vadr, (char *)&info, sizeof(info)) < 0) return -1;
     return 0;
 }
+
+uint64 sys_getprocs(void)
+{
+    return getprocs();
+}

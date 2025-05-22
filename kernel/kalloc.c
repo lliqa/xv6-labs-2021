@@ -86,7 +86,9 @@ kalloc(void)
   r = kmem.freelist;
   if(r) {
     kmem.freelist = r->next;
+    acquire(&ref.lock);
     ref.cnt[(uint64)r / PGSIZE] = 1;
+    release(&ref.lock);
   }
   release(&kmem.lock);
 

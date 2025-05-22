@@ -75,7 +75,6 @@ sys_sleep(void)
   return 0;
 }
 
-#ifdef LAB_PGTBL
 int
 sys_pgaccess(void)
 {
@@ -84,7 +83,9 @@ sys_pgaccess(void)
   if (argaddr(0, &va) < 0) {
     return -1;
   }
-
+  if (va >= MAXVA) {
+    return -1;
+  }
   int pgnums;
   if (argint(1, &pgnums) < 0) {
     return -1;
@@ -98,9 +99,6 @@ sys_pgaccess(void)
   uint64 bitmask = 0;
   struct proc *p = myproc();
   for (int i = 0; i < pgnums; ++i) {
-    if (va >= MAXVA) {
-        return -1;
-    }
     pte_t *pte = walk(p->pagetable, va, 0);
     if ((*pte & PTE_V) && (*pte & PTE_A)) {
       bitmask |= (1 << i);
@@ -113,7 +111,6 @@ sys_pgaccess(void)
   }
   return 0;
 }
-#endif
 
 uint64
 sys_kill(void)

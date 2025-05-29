@@ -30,7 +30,8 @@ OBJS = \
   $K/sysfile.o \
   $K/kernelvec.o \
   $K/plic.o \
-  $K/virtio_disk.o
+  $K/virtio_disk.o \
+  $K/heap.o
 
 OBJS_KCSAN = \
   $K/start.o \
@@ -196,6 +197,7 @@ UPROGS=\
 	$U/_trace\
 	$U/_sysinfotest\
 	$U/_getprocs_test\
+	$U/_heaptest\
 
 
 

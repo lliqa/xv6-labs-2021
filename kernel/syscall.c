@@ -107,6 +107,8 @@ extern uint64 sys_uptime(void);
 extern uint64 sys_trace(void);
 extern uint64 sys_sysinfo(void);
 extern uint64 sys_getprocs(void);
+extern uint64 sys_heapdemo(void);
+
 
 static uint64 (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -132,7 +134,8 @@ static uint64 (*syscalls[])(void) = {
 [SYS_close]   sys_close,
 [SYS_trace]   sys_trace,
 [SYS_sysinfo]   sys_sysinfo,
-[SYS_getprocs] sys_getprocs
+[SYS_getprocs] sys_getprocs,
+[SYS_heapdemo] sys_heapdemo
 };
 
 static char *syscalls_name[] = {
@@ -159,7 +162,8 @@ static char *syscalls_name[] = {
 [SYS_close]   "close",
 [SYS_trace]   "trace",
 [SYS_sysinfo] "sysinfo",
-[SYS_getprocs] "getprocs"
+[SYS_getprocs] "getprocs",
+[SYS_heapdemo] "heapdemo"
 };
 
 void

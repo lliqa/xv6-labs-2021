@@ -25,6 +25,7 @@ int sleep(int);
 int uptime(void);
 int trace(int);
 int getprocs(void);
+int heapdemo(void);
 
 struct sysinfo;
 int sysinfo(struct sysinfo *);

@@ -23,3 +23,4 @@
 #define SYS_trace  22
 #define SYS_sysinfo 23
 #define SYS_getprocs 24
+#define SYS_heapdemo 25

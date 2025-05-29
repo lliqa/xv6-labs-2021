@@ -11,8 +11,13 @@
 
 void freerange(void *pa_start, void *pa_end);
 
+#define HEAP_SIZE (8 * 1024 * 1024) // 8MB
+
+
 extern char end[]; // first address after kernel.
-                   // defined by kernel.ld.
+                   // defined by kernel.ld
+char* heap_start;
+char* heap_end;
 
 struct run {
   struct run *next;
@@ -23,11 +28,28 @@ struct {
   struct run *freelist;
 } kmem;
 
+typedef struct block {
+    uint size;             // 数据部分大小（不包含头部）
+    struct block *next;
+    int free;              // 是否空闲
+} block_t;
+
+#define BLOCK_SIZE sizeof(block_t)
+
+
 void
 kinit()
 {
   initlock(&kmem.lock, "kmem");
-  freerange(end, (void*)PHYSTOP);
+  freerange(end, (void*)PHYSTOP - HEAP_SIZE);
+
+  heap_end = (char*)PHYSTOP;
+  heap_start = heap_end - HEAP_SIZE;
+
+  block_t *p = (block_t *)heap_start;
+  p->size = HEAP_SIZE - BLOCK_SIZE;
+  p->next = 0;
+  p->free = 1;
 }
 
 void
@@ -48,7 +70,7 @@ kfree(void *pa)
 {
   struct run *r;
 
-  if(((uint64)pa % PGSIZE) != 0 || (char*)pa < end || (uint64)pa >= PHYSTOP)
+  if(((uint64)pa % PGSIZE) != 0 || (char*)pa < end || (uint64)pa >= PHYSTOP - HEAP_SIZE)
     panic("kfree");
 
   // Fill with junk to catch dangling refs.
@@ -81,6 +103,7 @@ kalloc(void)
   return (void*)r;
 }
 
+
 void getFreemem(uint64 *freemem) {
     *freemem = 0;
 
@@ -93,4 +116,37 @@ void getFreemem(uint64 *freemem) {
         r = r->next;
     }
     release(&kmem.lock);
+}
+
+void* malloc(uint size) {
+    block_t *curr = (block_t *)heap_start;
+    
+    while (curr) {
+        if (curr->free && curr->size >= size) {
+            // 若空闲块足够大，则分配
+            if (curr->size >= size + BLOCK_SIZE) {
+                // 拆分
+                block_t *new_block = (block_t*)((char*)curr + BLOCK_SIZE + size);
+                new_block->size = curr->size - size - BLOCK_SIZE;
+                new_block->next = curr->next;
+                new_block->free = 1;
+
+                curr->next = new_block;
+                curr->size = size;
+            }
+            curr->free = 0;
+            return (char*)curr + BLOCK_SIZE;
+        }
+        curr = curr->next;
+    }
+    return 0; // 分配失败
+}
+
+
+void free(void *ptr) {
+    if (!ptr)
+        return;
+
+    block_t *blk = (block_t *)((char*)ptr - BLOCK_SIZE);
+    blk->free = 1;
 }

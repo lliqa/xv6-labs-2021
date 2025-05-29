@@ -125,3 +125,12 @@ uint64 sys_getprocs(void)
 {
     return getprocs();
 }
+
+extern void heap_demo(void);
+
+uint64
+sys_heapdemo(void)
+{
+  heap_demo();
+  return 0;
+}
